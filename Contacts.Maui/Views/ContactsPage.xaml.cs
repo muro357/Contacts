@@ -17,10 +17,8 @@ public partial class ContactsPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-
-        var contacts = new ObservableCollection<Contact>(ContactRepository.GetContacts());
-
-        listContacts.ItemsSource = contacts;
+        SearchBar.Text= string.Empty;
+        LoadContacts();
     }
 
     private async void listContacts_ItemSelected(object sender, SelectedItemChangedEventArgs e)
@@ -38,9 +36,35 @@ public partial class ContactsPage : ContentPage
         listContacts.SelectedItem = null;
     }
 
-    private void btnAdd_Clicked(object sender, EventArgs e)
+    private async void btnAdd_Clicked(object sender, EventArgs e)
     {
+        await Shell.Current.GoToAsync(nameof(AddContactPage));
+    }
 
+    private void Delete_Clicked(object sender, EventArgs e)
+    {
+        var menuItem = sender as MenuItem;
+        var contact = menuItem.CommandParameter as Contact;
+        ContactRepository.DeleteContact(contact.ContactId);
+        LoadContacts();
+    }
+
+    private void LoadContacts()
+    {
+        var contacts = new ObservableCollection<Contact>(ContactRepository.GetContacts());
+        listContacts.ItemsSource = contacts;
+    }
+
+    private void SearchBar_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        var filter = ((SearchBar)sender).Text;
+        var contacts = new ObservableCollection<Contact>(ContactRepository.SearchContacts(filter));
+        listContacts.ItemsSource = contacts;
+    }
+
+    private void SearchBar_SearchButtonPressed(object sender, EventArgs e)
+    {
+        DisplayAlert("Aviso","No Implementado","OK");
     }
 }
 

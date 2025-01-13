@@ -28,10 +28,10 @@ public partial class EditContactPage : ContentPage
             _contact = ContactRepository.GetContactById(int.Parse(value));
             if ( _contact != null )
             {
-                entryName.Text = _contact.Name;
-                entryEmail.Text = _contact.Email;
-                entryPhone.Text = _contact.Phone;
-                entryAddress.Text = _contact.Address;
+                contactCtrl.Name = _contact.Name;
+                contactCtrl.Email = _contact.Email;
+                contactCtrl.Phone = _contact.Phone;
+                contactCtrl.Address = _contact.Address;
             }
         }
     }
@@ -41,35 +41,24 @@ public partial class EditContactPage : ContentPage
         if(_contact != null )
         {
 
-            if(nameValidator.IsNotValid)
-            {
-                DisplayAlert("Error","Name is required","OK");
-                return;
-            }
-
-            if(emailValidator.IsNotValid)
-            {
-                StringBuilder listErrors = new StringBuilder();
-                foreach (var error in emailValidator.Errors)
-                {
-                    listErrors.AppendLine(error.ToString());
-                }
-
-                DisplayAlert("Error",listErrors.ToString(),"OK");
-                return;
-            }
+            
 
             var contact = new Contact()
             {
                 ContactId=_contact.ContactId,
-                Name = entryName.Text,
-                Email = entryEmail.Text,
-                Phone = entryPhone.Text,
-                Address = entryAddress.Text
+                Name = contactCtrl.Name,
+                Email = contactCtrl.Email,
+                Phone = contactCtrl.Phone,
+                Address = contactCtrl.Address
             };
 
             ContactRepository.UpdateContact(_contact.ContactId, contact);
             Shell.Current.GoToAsync("..");
         }
+    }
+
+    private void contactCtrl_OnError(object sender, string e)
+    {
+        DisplayAlert("Error",e,"OK");
     }
 }

@@ -1,6 +1,7 @@
 using Contacts.Maui.Models;
+using Contacts.UseCases.Interfaces;
 using System.Text;
-using Contact = Contacts.Maui.Models.Contact;
+using Contact = Contacts.CoreBusiness.Contact;
 
 namespace Contacts.Maui.Views;
 
@@ -8,10 +9,15 @@ namespace Contacts.Maui.Views;
 public partial class EditContactPage : ContentPage
 {
     Contact _contact;
-	public EditContactPage()
+    private readonly IViewContactUseCase viewContactUseCase;
+    private readonly IEditContactUseCase editContactUseCase;
+
+    public EditContactPage(IViewContactUseCase viewContactUseCase,IEditContactUseCase editContactUseCase)
 	{
 		InitializeComponent();
-	}
+        this.viewContactUseCase = viewContactUseCase;
+        this.editContactUseCase = editContactUseCase;
+    }
 
     private void btnCancel_Clicked(object sender, EventArgs e)
     {
@@ -25,7 +31,8 @@ public partial class EditContactPage : ContentPage
     { 
         set
         {
-            _contact = ContactRepository.GetContactById(int.Parse(value));
+            //_contact = ContactRepository.GetContactById(int.Parse(value));
+            _contact = viewContactUseCase.ExecuteAsync(int.Parse(value)).GetAwaiter().GetResult();
             if ( _contact != null )
             {
                 contactCtrl.Name = _contact.Name;
@@ -36,12 +43,10 @@ public partial class EditContactPage : ContentPage
         }
     }
 
-    private void btnUpdate_Clicked(object sender, EventArgs e)
+    private async void btnUpdate_Clicked(object sender, EventArgs e)
     {
         if(_contact != null )
         {
-
-            
 
             var contact = new Contact()
             {
@@ -52,8 +57,9 @@ public partial class EditContactPage : ContentPage
                 Address = contactCtrl.Address
             };
 
-            ContactRepository.UpdateContact(_contact.ContactId, contact);
-            Shell.Current.GoToAsync("..");
+            //ContactRepository.UpdateContact(_contact.ContactId, contact);
+            await editContactUseCase.ExecuteAsync(_contact.ContactId, contact);
+            await Shell.Current.GoToAsync("..");
         }
     }
 
